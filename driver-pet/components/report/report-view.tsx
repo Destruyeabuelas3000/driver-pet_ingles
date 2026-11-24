@@ -7,7 +7,7 @@
     permanente conecta Vercel Blob y sube el archivo en `onUpload`.
 */
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Activity, AlertTriangle, Check, Frown, Meh, MapPin, Plus, Smile, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -41,9 +41,12 @@ function durationBetween(start: string, end: string) {
   return `${Math.floor(mins / 60)}h ${String(mins % 60).padStart(2, '0')}m`
 }
 
-export function ReportView({ walkerParam, petParam }: { walkerParam?: string; petParam?: string }) {
+export function ReportView() {
   const { walkers, pets, owner, addReport } = useApp()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const walkerParam = searchParams.get('paseador') ?? undefined
+  const petParam = searchParams.get('mascota') ?? undefined
   const [walkerId, setWalkerId] = useState(walkers.find((w) => w.id === walkerParam)?.id ?? walkers[0].id)
   const [petId, setPetId] = useState(pets.find((p) => p.id === petParam)?.id ?? pets[0]?.id ?? '')
   const [start, setStart] = useState('08:00')

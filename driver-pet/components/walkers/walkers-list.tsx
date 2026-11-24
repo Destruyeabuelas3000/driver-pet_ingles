@@ -1,12 +1,14 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { getWalkerRating, useApp } from '@/lib/store'
 import { WalkerCard } from './walker-card'
 
-export function WalkersList({ query }: { query: string }) {
+export function WalkersList() {
   const { walkers, reviews } = useApp()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const query = searchParams.get('q') ?? ''
   const q = query.trim().toLowerCase()
   const list = q
     ? walkers.filter((w) => `${w.name} ${w.zone} ${w.bio}`.toLowerCase().includes(q))
