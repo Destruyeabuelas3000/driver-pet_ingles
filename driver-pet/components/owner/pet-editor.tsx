@@ -1,8 +1,9 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { ArrowUpRight, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Field, PillSelect, inputClass, textareaClass } from '@/components/form-fields'
 import { formatTime, useApp } from '@/lib/store'
@@ -13,7 +14,7 @@ const SIZES: PetSize[] = ['Pequeño', 'Mediano', 'Grande']
 const DAY_OPTIONS = ['Lunes - Viernes', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Fines de semana']
 
 export function PetEditor({ pet }: { pet: Pet }) {
-  const { updatePet, removePet } = useApp()
+  const { updatePet, removePet, walkers } = useApp()
   const [form, setForm] = useState(pet)
   const [saved, setSaved] = useState(false)
   const [schedule, setSchedule] = useState<Omit<WalkSchedule, 'id'>>({
@@ -22,6 +23,10 @@ export function PetEditor({ pet }: { pet: Pet }) {
     end: '09:00',
     label: 'Paseo Matutino',
   })
+
+  useEffect(() => {
+    setForm(pet)
+  }, [pet])
 
   function patch(p: Partial<Pet>) {
     setForm((f) => ({ ...f, ...p }))
@@ -86,7 +91,7 @@ export function PetEditor({ pet }: { pet: Pet }) {
             </PillSelect>
           </Field>
           <div className="sm:col-span-2">
-            <Field label="Datos de la mascota (alergias, carácter, cuidados)" htmlFor="p-notes">
+            <Field label="Descripción y cuidados (alergias, carácter, necesidades)" htmlFor="p-notes">
               <textarea id="p-notes" rows={3} className={textareaClass} value={form.notes} onChange={(e) => patch({ notes: e.target.value })} />
             </Field>
           </div>
@@ -151,6 +156,34 @@ export function PetEditor({ pet }: { pet: Pet }) {
             <Plus aria-hidden /> Agendar horario
           </Button>
         </div>
+      </section>
+
+      <section aria-labelledby="walkers-title" className="rounded-2xl border bg-card p-5 shadow-sm">
+        <h3 id="walkers-title" className="text-xl font-medium">
+          Perfiles de paseadores
+        </h3>
+        <p className="mb-3 mt-1 text-sm text-muted-foreground">
+          Consulta sus perfiles para elegir quién paseará a {form.name}.
+        </p>
+        <ul className="grid gap-2 sm:grid-cols-2">
+          {walkers.map((walker) => (
+            <li key={walker.id}>
+              <Link
+                href={`/paseadores/${walker.id}`}
+                className="flex items-center gap-3 rounded-xl border p-2 transition-colors hover:bg-secondary focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="relative size-11 shrink-0 overflow-hidden rounded-full">
+                  <Image src={walker.photo} alt="" fill sizes="44px" className="object-cover" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-bold">{walker.name}</span>
+                  <span className="block truncate text-xs text-muted-foreground">{walker.zone}</span>
+                </span>
+                <ArrowUpRight className="size-4 shrink-0 text-primary" aria-hidden />
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
     </div>
   )

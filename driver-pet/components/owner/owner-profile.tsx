@@ -7,7 +7,7 @@
   - Reportes: aquí aparecen los reportes que envían los paseadores.
 */
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Dog, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Field, inputClass } from '@/components/form-fields'
@@ -22,6 +22,10 @@ export function OwnerProfile() {
   const [saved, setSaved] = useState(false)
   const [selectedId, setSelectedId] = useState(pets[0]?.id ?? '')
   const selected = pets.find((p) => p.id === selectedId) ?? pets[0]
+
+  useEffect(() => {
+    setForm(owner)
+  }, [owner])
 
   function onSave(e: React.FormEvent) {
     e.preventDefault()
@@ -49,9 +53,12 @@ export function OwnerProfile() {
       <h1 className="text-3xl font-bold md:text-4xl">Mi Perfil</h1>
 
       <section aria-labelledby="owner-title" className="rounded-2xl border bg-card p-5 shadow-sm">
-        <h2 id="owner-title" className="mb-4 text-xl font-bold">
-          Datos del dueño
+        <h2 id="owner-title" className="text-xl font-bold">
+          Perfil del usuario
         </h2>
+        <p className="mb-4 mt-1 text-sm text-muted-foreground">
+          Crea o actualiza tu perfil. Se guarda localmente en este navegador.
+        </p>
         <form onSubmit={onSave} className="grid gap-4 sm:grid-cols-2">
           <Field label="Nombre" htmlFor="o-name">
             <input id="o-name" className={inputClass} value={form.name} onChange={(e) => { setForm({ ...form, name: e.target.value }); setSaved(false) }} required />
@@ -67,7 +74,7 @@ export function OwnerProfile() {
           </Field>
           <div className="flex items-center gap-3 sm:col-span-2">
             <Button type="submit" className="h-10 rounded-full px-6">
-              Guardar datos
+              Guardar perfil
             </Button>
             {saved && <span role="status" className="text-sm text-primary">Datos guardados</span>}
           </div>
@@ -77,7 +84,7 @@ export function OwnerProfile() {
       <section aria-labelledby="pets-title" className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 id="pets-title" className="text-xl font-bold">
-            Mis mascotas
+            Mis mascotas <span className="text-primary">({pets.length})</span>
           </h2>
           <Button variant="outline" className="h-9 rounded-full border-primary text-primary" onClick={onAddPet}>
             <Plus aria-hidden /> Agregar mascota

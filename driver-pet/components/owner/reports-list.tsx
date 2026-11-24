@@ -53,6 +53,10 @@ export function ReportsList() {
                   <span>Energía: {r.energy}%</span>
                 </p>
                 <p className="text-sm leading-relaxed">{r.notes}</p>
+                <p className="flex items-center gap-1 text-sm font-medium text-primary">
+                  <Check className="size-4" aria-hidden />
+                  {r.handoffConfirmed ? `Entrega confirmada a ${r.deliveredTo}` : `Entrega pendiente para ${r.deliveredTo}`}
+                </p>
                 {r.photos.length > 0 && (
                   <div className="flex gap-2">
                     {r.photos.map((src) => (

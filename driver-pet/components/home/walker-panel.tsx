@@ -107,7 +107,7 @@ export function WalkerPanel({ walker, rating }: { walker: Walker; rating: number
       {status !== 'idle' && (
         <p role="status" className={status === 'ok' ? 'text-sm text-primary' : 'text-sm text-destructive'}>
           {status === 'ok'
-            ? `¡Solicitud enviada! ${pets[0]?.name} quedó agendada con ${walker.name}.`
+            ? `¡Solicitud enviada! ${pets[0]?.name} quedó agendada con ${walker.name}. El paseador recibió un aviso en su perfil.`
             : 'Este paseador ya alcanzó su capacidad máxima.'}
         </p>
       )}

@@ -2,78 +2,119 @@
 
 /*
   NOTA EDITABLE: PERFIL DEL PASEADOR
-  - "Editar perfil" permite cambiar nombre, biografía, zona y capacidad.
-  - "Agregar ruta" crea una nueva ruta alrededor de la ruta actual.
-  - Los dueños dejan su calificación en el formulario de reseñas.
+  - El panel del paseador permite cambiar nombre, biografía, zona y capacidad.
+  - Desde ese panel también se pueden crear y editar rutas.
+  - Los dueños dejan su calificación en el perfil público.
 */
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ClipboardCheck, MapPin, Pencil, Plus, Trash2, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { RouteMap } from '@/components/map/route-map'
+import { GoogleMapsLink, RouteMap } from '@/components/map/route-map'
 import { StarInput, StarRating } from '@/components/star-rating'
 import { Field, PillSelect, inputClass, textareaClass } from '@/components/form-fields'
 import { ROUTE_TYPES, ZONES } from '@/lib/data'
 import { getWalkerRating, useApp } from '@/lib/store'
-import type { RouteType, Walker } from '@/lib/types'
+import type { RouteType, WalkSchedule, Walker } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
-export function WalkerProfile({ id }: { id: string }) {
+const ROUTE_DAYS = [
+  'Lunes - Viernes',
+  'Lunes - Sábado',
+  'Lunes',
+  'Martes',
+  'Miércoles',
+  'Jueves',
+  'Viernes',
+  'Sábado',
+  'Domingo',
+  'Sábado - Domingo',
+  'Fines de semana',
+]
+
+export function WalkerProfile({
+  id,
+  editable = false,
+  showReviews = true,
+  embedded = false,
+}: {
+  id: string
+  editable?: boolean
+  showReviews?: boolean
+  embedded?: boolean
+}) {
   const { walkers, reviews } = useApp()
   const walker = walkers.find((w) => w.id === id)
 
   if (!walker) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-16 text-center">
+      <div className="mx-auto max-w-3xl px-4 py-16 text-center">
         <h1 className="text-2xl font-bold">Paseador no encontrado</h1>
         <Link href="/paseadores" className="mt-4 inline-block text-primary underline">
           Ver todos los paseadores
         </Link>
-      </main>
+      </div>
     )
   }
 
   const { average, count } = getWalkerRating(reviews, walker.id)
   const walkerReviews = reviews.filter((r) => r.walkerId === walker.id)
+  const Container = embedded ? 'div' : 'main'
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 md:px-6">
-      <ProfileHeader walker={walker} average={average} count={count} />
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <RoutesSection walker={walker} />
-        <section aria-labelledby="reviews-title" className="flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-sm">
-          <h2 id="reviews-title" className="text-xl font-bold">
-            Calificaciones de los dueños
-          </h2>
-          <ReviewForm walkerId={walker.id} />
-          <ul className="flex flex-col gap-3">
-            {walkerReviews.map((r) => (
-              <li key={r.id} className="rounded-xl border bg-secondary/60 p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-bold">
-                    {r.ownerName} <span className="font-normal text-muted-foreground">· dueño de {r.petName}</span>
-                  </p>
-                  <StarRating value={r.rating} size="size-3.5" />
-                </div>
-                <p className="mt-1 text-sm leading-relaxed">{r.comment}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{r.date}</p>
-              </li>
-            ))}
-            {walkerReviews.length === 0 && (
-              <li className="text-sm text-muted-foreground">Aún no tiene reseñas. ¡Sé el primero!</li>
-            )}
-          </ul>
-        </section>
+    <Container className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 md:px-6">
+      <ProfileHeader walker={walker} average={average} count={count} editable={editable} />
+      <div className={showReviews ? 'grid gap-6 lg:grid-cols-[1.2fr_1fr]' : ''}>
+        <RoutesSection walker={walker} editable={editable} />
+        {showReviews && (
+          <section aria-labelledby="reviews-title" className="flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-sm">
+            <h2 id="reviews-title" className="text-xl font-bold">
+              Calificaciones de los dueños
+            </h2>
+            <ReviewForm walkerId={walker.id} />
+            <ul className="flex flex-col gap-3">
+              {walkerReviews.map((r) => (
+                <li key={r.id} className="rounded-xl border bg-secondary/60 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-bold">
+                      {r.ownerName} <span className="font-normal text-muted-foreground">· dueño de {r.petName}</span>
+                    </p>
+                    <StarRating value={r.rating} size="size-3.5" />
+                  </div>
+                  <p className="mt-1 text-sm leading-relaxed">{r.comment}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{r.date}</p>
+                </li>
+              ))}
+              {walkerReviews.length === 0 && (
+                <li className="text-sm text-muted-foreground">Aún no tiene reseñas. ¡Sé el primero!</li>
+              )}
+            </ul>
+          </section>
+        )}
       </div>
-    </main>
+    </Container>
   )
 }
 
-function ProfileHeader({ walker, average, count }: { walker: Walker; average: number; count: number }) {
+function ProfileHeader({
+  walker,
+  average,
+  count,
+  editable,
+}: {
+  walker: Walker
+  average: number
+  count: number
+  editable: boolean
+}) {
   const { updateWalker } = useApp()
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState({ name: walker.name, bio: walker.bio, zone: walker.zone, capacity: walker.capacity })
+
+  useEffect(() => {
+    setForm({ name: walker.name, bio: walker.bio, zone: walker.zone, capacity: walker.capacity })
+  }, [walker])
 
   function onSave(e: React.FormEvent) {
     e.preventDefault()
@@ -137,29 +178,38 @@ function ProfileHeader({ walker, average, count }: { walker: Walker; average: nu
           <p className="text-sm">
             Capacidad: <strong>{walker.currentDogIds.length}/{walker.capacity}</strong> perros
           </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <Button variant="outline" className="h-10 rounded-full border-2 border-primary px-5 text-primary" onClick={() => setEditing(true)}>
-              <Pencil aria-hidden /> Editar perfil
-            </Button>
-            <Button className="h-10 rounded-full px-5" nativeButton={false} render={<Link href={`/reportar?paseador=${walker.id}`} />}>
-              <ClipboardCheck aria-hidden /> Finalizar y reportar paseo
-            </Button>
-          </div>
+          {editable && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button variant="outline" className="h-10 rounded-full border-2 border-primary px-5 text-primary" onClick={() => setEditing(true)}>
+                <Pencil aria-hidden /> Editar perfil
+              </Button>
+              <Button className="h-10 rounded-full px-5" nativeButton={false} render={<Link href={`/reportar?paseador=${walker.id}`} />}>
+                <ClipboardCheck aria-hidden /> Finalizar y reportar paseo
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </section>
   )
 }
-
-function RoutesSection({ walker }: { walker: Walker }) {
+function RoutesSection({ walker, editable }: { walker: Walker; editable: boolean }) {
   const { updateWalker, addRoute, removeRoute } = useApp()
   const [adding, setAdding] = useState(false)
-  const [form, setForm] = useState({ name: '', type: 'Parque' as RouteType, distanceKm: 1.5, durationMin: 40 })
+  const [form, setForm] = useState({
+    name: '',
+    type: 'Parque' as RouteType,
+    distanceKm: 1.5,
+    durationMin: 40,
+    days: 'Lunes - Viernes',
+    start: '08:00',
+    end: '09:00',
+  })
   const current = walker.routes.find((r) => r.id === walker.currentRouteId) ?? walker.routes[0]
 
   function onAdd(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.name.trim()) return
+    if (!form.name.trim() || form.end <= form.start) return
     const shift = 0.005 * walker.routes.length
     const center: [number, number] = [current.center[0] + shift, current.center[1] - shift]
     const d = [0.0025, 0.0032]
@@ -170,6 +220,13 @@ function RoutesSection({ walker }: { walker: Walker }) {
       zone: walker.zone,
       distanceKm: Number(form.distanceKm),
       durationMin: Number(form.durationMin),
+      schedules: [{
+        id: crypto.randomUUID(),
+        days: form.days,
+        start: form.start,
+        end: form.end,
+        label: form.name.trim(),
+      }],
       center,
       path: [
         [center[0] + d[0], center[1] - d[1]],
@@ -179,7 +236,15 @@ function RoutesSection({ walker }: { walker: Walker }) {
         [center[0] + d[0], center[1] - d[1]],
       ],
     })
-    setForm({ name: '', type: 'Parque', distanceKm: 1.5, durationMin: 40 })
+    setForm({
+      name: '',
+      type: 'Parque',
+      distanceKm: 1.5,
+      durationMin: 40,
+      days: 'Lunes - Viernes',
+      start: '08:00',
+      end: '09:00',
+    })
     setAdding(false)
   }
 
@@ -189,16 +254,18 @@ function RoutesSection({ walker }: { walker: Walker }) {
         <h2 id="routes-title" className="text-xl font-bold">
           Rutas de paseo
         </h2>
-        <Button variant="outline" className="h-9 rounded-full border-primary text-primary" onClick={() => setAdding((v) => !v)}>
-          <Plus aria-hidden /> Agregar ruta
-        </Button>
+        {editable && (
+          <Button variant="outline" className="h-9 rounded-full border-primary text-primary" onClick={() => setAdding((v) => !v)}>
+            <Plus aria-hidden /> Agregar ruta
+          </Button>
+        )}
       </div>
 
       {adding && (
         <form onSubmit={onAdd} className="grid gap-3 rounded-xl border bg-secondary/60 p-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <Field label="Nombre de la ruta" htmlFor="r-name">
-              <input id="r-name" className={inputClass} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ej. Parque Central - Circuito C" required />
+              <input id="r-name" className={inputClass} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ej. Parque de los Novios - Circuito C" required />
             </Field>
           </div>
           <Field label="Tipo" htmlFor="r-type">
@@ -216,6 +283,19 @@ function RoutesSection({ walker }: { walker: Walker }) {
               <input id="r-min" type="number" min={5} className={inputClass} value={form.durationMin} onChange={(e) => setForm({ ...form, durationMin: Number(e.target.value) })} />
             </Field>
           </div>
+          <Field label="Días" htmlFor="r-days">
+            <PillSelect id="r-days" value={form.days} onChange={(e) => setForm({ ...form, days: e.target.value })}>
+              {ROUTE_DAYS.map((day) => <option key={day}>{day}</option>)}
+            </PillSelect>
+          </Field>
+          <div className="grid grid-cols-2 gap-2">
+            <Field label="Hora de inicio" htmlFor="r-start">
+              <input id="r-start" type="time" className={inputClass} value={form.start} onChange={(e) => setForm({ ...form, start: e.target.value })} required />
+            </Field>
+            <Field label="Hora de fin" htmlFor="r-end">
+              <input id="r-end" type="time" min={form.start} className={inputClass} value={form.end} onChange={(e) => setForm({ ...form, end: e.target.value })} required />
+            </Field>
+          </div>
           <Button type="submit" className="h-10 rounded-full sm:col-span-2">
             Guardar ruta
           </Button>
@@ -225,6 +305,7 @@ function RoutesSection({ walker }: { walker: Walker }) {
       <div className="h-64 overflow-hidden rounded-xl border">
         <RouteMap route={current} />
       </div>
+      <GoogleMapsLink route={current} className="self-start text-sm text-primary underline" />
 
       <ul className="flex flex-col gap-2">
         {walker.routes.map((r) => {
@@ -232,15 +313,35 @@ function RoutesSection({ walker }: { walker: Walker }) {
           return (
             <li
               key={r.id}
-              className={cn('flex items-center gap-3 rounded-xl border p-3', active ? 'border-primary bg-secondary' : 'bg-card')}
+              className={cn('relative flex items-center gap-3 rounded-xl border p-3', active ? 'border-primary bg-secondary' : 'bg-card')}
             >
-              <button type="button" onClick={() => updateWalker(walker.id, { currentRouteId: r.id })} className="flex-1 text-left">
-                <span className="block font-bold text-primary">{r.name}</span>
-                <span className="block text-sm text-muted-foreground">
-                  {r.type} · {r.distanceKm}km · {r.durationMin}min {active && '· Ruta actual'}
-                </span>
-              </button>
-              {walker.routes.length > 1 && (
+              {editable ? (
+                <button type="button" onClick={() => updateWalker(walker.id, { currentRouteId: r.id })} className="flex-1 text-left">
+                  <span className="block font-bold text-primary">{r.name}</span>
+                  <span className="block text-sm text-muted-foreground">
+                    {r.type} · {r.distanceKm}km · {r.durationMin}min {active && '· Ruta actual'}
+                  </span>
+                  {r.schedules.map((schedule) => (
+                    <span key={schedule.id} className="block text-xs text-muted-foreground">
+                      {schedule.days}: {schedule.start} - {schedule.end}
+                    </span>
+                  ))}
+                </button>
+              ) : (
+                <div className="flex-1">
+                  <span className="block font-bold text-primary">{r.name}</span>
+                  <span className="block text-sm text-muted-foreground">
+                    {r.type} · {r.distanceKm}km · {r.durationMin}min {active && '· Ruta actual'}
+                  </span>
+                  {r.schedules.map((schedule) => (
+                    <span key={schedule.id} className="block text-xs text-muted-foreground">
+                      {schedule.days}: {schedule.start} - {schedule.end}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {editable && <RouteScheduleEditor walker={walker} route={r} />}
+              {editable && walker.routes.length > 1 && (
                 <Button variant="ghost" size="icon" onClick={() => removeRoute(walker.id, r.id)} aria-label={`Eliminar ruta ${r.name}`}>
                   <Trash2 aria-hidden />
                 </Button>
@@ -250,6 +351,131 @@ function RoutesSection({ walker }: { walker: Walker }) {
         })}
       </ul>
     </section>
+  )
+}
+
+function RouteScheduleEditor({ walker, route }: { walker: Walker; route: Walker['routes'][number] }) {
+  const { updateWalker } = useApp()
+  const [editing, setEditing] = useState(false)
+  const [schedules, setSchedules] = useState(route.schedules)
+  const invalidSchedules = schedules.some(
+    (schedule) => !schedule.days || !schedule.label.trim() || schedule.end <= schedule.start,
+  )
+
+  useEffect(() => {
+    setSchedules(route.schedules)
+  }, [route.schedules])
+
+  function updateSchedule(id: string, patch: Partial<WalkSchedule>) {
+    setSchedules((current) => current.map((schedule) => (
+      schedule.id === id ? { ...schedule, ...patch } : schedule
+    )))
+  }
+
+  function saveSchedules() {
+    if (invalidSchedules) return
+    updateWalker(walker.id, {
+      routes: walker.routes.map((item) => item.id === route.id ? { ...item, schedules } : item),
+    })
+    setEditing(false)
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        className="h-9 rounded-full border-primary px-3 text-primary"
+        aria-expanded={editing}
+        onClick={() => setEditing((current) => !current)}
+      >
+        {editing ? 'Cerrar' : 'Editar horarios'}
+      </Button>
+      {editing && (
+        <div className="absolute top-10 right-0 z-10 w-[min(90vw,24rem)] rounded-xl border bg-card p-3 shadow-lg">
+          <div className="flex flex-col gap-3">
+            {schedules.map((schedule) => (
+              <div key={schedule.id} className="grid grid-cols-2 gap-2 rounded-lg border p-2">
+                <Field label="Días" htmlFor={`schedule-days-${schedule.id}`}>
+                  <PillSelect
+                    id={`schedule-days-${schedule.id}`}
+                    value={schedule.days}
+                    onChange={(e) => updateSchedule(schedule.id, { days: e.target.value })}
+                  >
+                    {ROUTE_DAYS.map((day) => <option key={day}>{day}</option>)}
+                  </PillSelect>
+                </Field>
+                <Field label="Actividad" htmlFor={`schedule-label-${schedule.id}`}>
+                  <input
+                    id={`schedule-label-${schedule.id}`}
+                    className={inputClass}
+                    value={schedule.label}
+                    onChange={(e) => updateSchedule(schedule.id, { label: e.target.value })}
+                    required
+                  />
+                </Field>
+                <Field label="Desde" htmlFor={`schedule-start-${schedule.id}`}>
+                  <input
+                    id={`schedule-start-${schedule.id}`}
+                    type="time"
+                    className={inputClass}
+                    value={schedule.start}
+                    onChange={(e) => updateSchedule(schedule.id, { start: e.target.value })}
+                    required
+                  />
+                </Field>
+                <Field label="Hasta" htmlFor={`schedule-end-${schedule.id}`}>
+                  <input
+                    id={`schedule-end-${schedule.id}`}
+                    type="time"
+                    className={inputClass}
+                    value={schedule.end}
+                    min={schedule.start}
+                    onChange={(e) => updateSchedule(schedule.id, { end: e.target.value })}
+                    required
+                  />
+                </Field>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="h-8 rounded-full sm:col-span-2"
+                  onClick={() => setSchedules((current) => current.filter((item) => item.id !== schedule.id))}
+                >
+                  <Trash2 aria-hidden /> Quitar horario
+                </Button>
+              </div>
+            ))}
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 flex-1 rounded-full"
+                onClick={() => setSchedules((current) => [
+                  ...current,
+                  {
+                    id: crypto.randomUUID(),
+                    days: 'Lunes - Viernes',
+                    start: '08:00',
+                    end: '09:00',
+                    label: 'Paseo programado',
+                  },
+                ])}
+              >
+                <Plus aria-hidden /> Agregar horario
+              </Button>
+              <Button type="button" className="h-9 flex-1 rounded-full" onClick={saveSchedules}>
+                Guardar
+              </Button>
+            </div>
+            {invalidSchedules && (
+              <p role="alert" className="text-sm text-destructive">
+                Revisa los horarios: la hora de fin debe ser posterior al inicio.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 

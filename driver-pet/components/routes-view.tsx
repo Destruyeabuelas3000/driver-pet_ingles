@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { RouteMap } from '@/components/map/route-map'
+import { GoogleMapsLink, RouteMap } from '@/components/map/route-map'
 import { useApp } from '@/lib/store'
 import { cn } from '@/lib/utils'
 
@@ -39,8 +39,9 @@ export function RoutesView() {
         </ul>
         {selected && (
           <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-            <div className="flex items-center justify-between gap-2 bg-secondary px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 bg-secondary px-4 py-3">
               <p className="font-bold">{selected.route.name}</p>
+              <GoogleMapsLink route={selected.route} className="text-sm text-primary underline" />
               <Link href={`/paseadores/${selected.walker.id}`} className="text-sm text-primary underline">
                 Ver a {selected.walker.name}
               </Link>

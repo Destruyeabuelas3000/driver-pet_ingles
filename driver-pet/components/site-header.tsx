@@ -105,6 +105,15 @@ export function SiteHeader() {
               </Link>
               <Link
                 role="menuitem"
+                href="/perfil-paseador"
+                onClick={() => setUserOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-secondary"
+              >
+                <ClipboardCheck className="size-4 text-primary" aria-hidden />
+                Cambiar a perfil de paseador
+              </Link>
+              <Link
+                role="menuitem"
                 href="/reportar"
                 onClick={() => setUserOpen(false)}
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-secondary"

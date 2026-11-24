@@ -9,6 +9,7 @@ export interface WalkRoute {
   zone: string
   distanceKm: number
   durationMin: number
+  schedules: WalkSchedule[]
   center: LatLng
   path: LatLng[]
 }
@@ -82,4 +83,18 @@ export interface WalkReport {
   energy: number
   notes: string
   photos: string[]
+  deliveredTo: string
+  handoffConfirmed: boolean
+}
+
+export interface WalkNotification {
+  id: string
+  walkerId: string
+  petId: string
+  ownerName: string
+  days: string
+  start: string
+  end: string
+  createdAt: string
+  read: boolean
 }

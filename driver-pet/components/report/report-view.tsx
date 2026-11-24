@@ -8,12 +8,12 @@
 */
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Activity, AlertTriangle, Check, Frown, Meh, MapPin, Plus, Smile, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PillSelect, textareaClass } from '@/components/form-fields'
-import { RouteMap } from '@/components/map/route-map'
+import { GoogleMapsLink, RouteMap } from '@/components/map/route-map'
 import { SAMPLE_WALK_PHOTOS } from '@/lib/data'
 import { formatTime, useApp } from '@/lib/store'
 import type { Mood } from '@/lib/types'
@@ -42,7 +42,7 @@ function durationBetween(start: string, end: string) {
 }
 
 export function ReportView({ walkerParam, petParam }: { walkerParam?: string; petParam?: string }) {
-  const { walkers, pets, addReport } = useApp()
+  const { walkers, pets, owner, addReport } = useApp()
   const router = useRouter()
   const [walkerId, setWalkerId] = useState(walkers.find((w) => w.id === walkerParam)?.id ?? walkers[0].id)
   const [petId, setPetId] = useState(pets.find((p) => p.id === petParam)?.id ?? pets[0]?.id ?? '')
@@ -55,8 +55,13 @@ export function ReportView({ walkerParam, petParam }: { walkerParam?: string; pe
   const [notes, setNotes] = useState(
     '¡Se portó increíble hoy! Corrió bastante en el parque, jugó con otros perritos y bebió agua a mitad del camino. Hizo sus necesidades sin problema. Es muy obediente al llamado. Al final del paseo se notaba un poco cansada pero muy feliz.',
   )
+  const [deliveredTo, setDeliveredTo] = useState(owner.name)
   const [photos, setPhotos] = useState<string[]>(SAMPLE_WALK_PHOTOS)
   const [sent, setSent] = useState(false)
+
+  useEffect(() => {
+    setDeliveredTo(owner.name)
+  }, [owner.name])
 
   const walker = walkers.find((w) => w.id === walkerId)!
   const pet = pets.find((p) => p.id === petId)
@@ -89,6 +94,8 @@ export function ReportView({ walkerParam, petParam }: { walkerParam?: string; pe
       energy,
       notes: notes.trim(),
       photos,
+      deliveredTo: deliveredTo.trim(),
+      handoffConfirmed: true,
     })
     setSent(true)
   }
@@ -148,7 +155,10 @@ export function ReportView({ walkerParam, petParam }: { walkerParam?: string; pe
               <dt>Duración:</dt>
               <dd>{duration}</dd>
               <dt>Ruta:</dt>
-              <dd>{route.name}</dd>
+              <dd className="flex flex-col gap-1">
+                {route.name}
+                <GoogleMapsLink route={route} className="text-xs text-primary underline" />
+              </dd>
             </dl>
           </div>
         </section>
@@ -216,8 +226,25 @@ export function ReportView({ walkerParam, petParam }: { walkerParam?: string; pe
             <textarea id="notes" rows={4} className={textareaClass} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="¿Cómo se comportó?" required />
           </div>
 
+          <fieldset className="flex flex-col gap-3 rounded-xl border bg-secondary/60 p-4">
+            <legend className="px-1 font-medium">4. Entrega de la mascota</legend>
+            <p className="text-sm text-muted-foreground">
+              Indica quién recibió a {pet.name}. Al enviar el reporte confirmarás la entrega y avisarás al dueño.
+            </p>
+            <label htmlFor="delivered-to" className="text-sm font-medium">
+              Nombre de quien recibe
+            </label>
+            <input
+              id="delivered-to"
+              className="h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              value={deliveredTo}
+              onChange={(e) => setDeliveredTo(e.target.value)}
+              required
+            />
+          </fieldset>
+
           <div>
-            <p className="mb-2 font-medium">4. Fotos del Paseo</p>
+            <p className="mb-2 font-medium">5. Fotos del Paseo</p>
             <div className="flex flex-wrap gap-2">
               {photos.map((src) => (
                 <div key={src} className="group relative size-20 overflow-hidden rounded-lg">
@@ -247,6 +274,7 @@ export function ReportView({ walkerParam, petParam }: { walkerParam?: string; pe
               <p className="font-medium text-primary">
                 ¡Reporte enviado! Paseo de {pet.name}: {formatTime(start)} - {formatTime(end)}.
               </p>
+              <p className="text-sm">Entrega confirmada a {deliveredTo}.</p>
               <Button type="button" className="h-10 rounded-full px-6" onClick={() => router.push('/mi-perfil')}>
                 Ver en el perfil del dueño
               </Button>
@@ -257,7 +285,7 @@ export function ReportView({ walkerParam, petParam }: { walkerParam?: string; pe
                 Cancelar
               </Button>
               <Button type="submit" className="h-11 rounded-full text-base">
-                Enviar Reporte al Dueño
+                Confirmar entrega y avisar al dueño
               </Button>
             </div>
           )}

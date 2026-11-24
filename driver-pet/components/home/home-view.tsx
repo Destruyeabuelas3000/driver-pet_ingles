@@ -118,14 +118,14 @@ export function HomeView() {
               active={tab === 'pet'}
               onClick={() => setTab('pet')}
               title="Perfil de la Mascota"
-              subtitle={`${pet.name} · ${pet.breed}`}
+              subtitle={`${pets.length} ${pets.length === 1 ? 'mascota registrada' : 'mascotas registradas'}`}
               photo={pet.photo}
             />
           )}
         </div>
         <div className="relative rounded-2xl border bg-card p-5 shadow-lg" role="tabpanel">
           {tab === 'pet' && pet ? (
-            <PetPanel pet={pet} />
+            <PetPanel pet={pet} petCount={pets.length} />
           ) : (
             selected && <WalkerPanel walker={selected} rating={getWalkerRating(reviews, selected.id).average} />
           )}

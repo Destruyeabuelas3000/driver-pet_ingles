@@ -8,24 +8,20 @@
     cambia su `id` (único, sin espacios) y sus datos.
   - Las fotos van en /public/images/... y se referencian como
     '/images/carpeta/archivo.png'.
-  - Las rutas usan coordenadas [latitud, longitud]. Puedes obtenerlas
-    haciendo clic derecho en Google Maps sobre un punto.
-  - Los cambios hechos desde la interfaz viven en memoria (se pierden al
-    recargar). Para guardarlos de forma permanente conecta una base de
-    datos (por ejemplo Neon) y reemplaza el estado de lib/store.tsx.
+  - Las rutas usan coordenadas [latitud, longitud] de parques de Bogotá;
+    los recorridos dibujados son aproximados, no trazados GPS verificados.
+  - El perfil y las mascotas se guardan en localStorage desde lib/store.tsx.
   ===========================================================
 */
-import type { Owner, Pet, Review, WalkReport, WalkRoute, Walker } from './types'
+import type { Owner, Pet, Review, WalkReport, WalkRoute, Walker, WalkSchedule } from './types'
 
 export const APP_NAME = 'Driver Pet'
 export const APP_TAGLINE = 'Encuentra el Paseador Ideal para tu Mascota'
 export const APP_SUBTITLE =
   'Paseadores verificados, rutas seguras y reportes de cada paseo directo a tu celular.'
 
-export const ZONES = ['Parque Central', 'Zona Norte', 'Zona Sur', 'Centro Histórico']
+export const ZONES = ['Chapinero', 'Santa Fe', 'Teusaquillo', 'Tunjuelito', 'Usaquén']
 export const ROUTE_TYPES = ['Parque', 'Urbana', 'Sendero'] as const
-
-const BASE: [number, number] = [19.4119, -99.17]
 
 function rectangle(
   center: [number, number],
@@ -50,9 +46,14 @@ function route(
   zone: string,
   distanceKm: number,
   durationMin: number,
-  offset: [number, number],
+  center: [number, number],
+  schedule: Omit<WalkSchedule, 'id'> = {
+    days: 'Lunes - Viernes',
+    start: '08:00',
+    end: '09:00',
+    label: 'Paseo programado',
+  },
 ): WalkRoute {
-  const center: [number, number] = [BASE[0] + offset[0], BASE[1] + offset[1]]
   return {
     id,
     name,
@@ -60,6 +61,7 @@ function route(
     zone,
     distanceKm,
     durationMin,
+    schedules: [{ ...schedule, id: `${id}-schedule` }],
     center,
     path: rectangle(center, 0.0028, 0.0036),
   }
@@ -71,15 +73,25 @@ export const initialWalkers: Walker[] = [
     name: 'Elena Torres',
     photo: '/images/paseadores/elena.png',
     bio: 'Amante de los perros grandes. Paseos con mucho juego, socialización y cuidado especial en días calurosos.',
-    zone: 'Parque Central',
+    zone: 'Teusaquillo',
     walksCount: 342,
     capacity: 10,
     currentDogIds: ['canela', 'bruno', 'coco', 'luna', 'maya', 'milo', 'toby'],
     currentRouteId: 'elena-a',
     featuredBreed: 'Golden Retriever',
     routes: [
-      route('elena-a', 'Parque Central - Circuito A', 'Parque', 'Parque Central', 1.2, 45, [0, 0]),
-      route('elena-b', 'Avenida de los Árboles', 'Urbana', 'Parque Central', 2.0, 60, [0.006, 0.004]),
+      route('elena-a', 'Parque de los Novios', 'Parque', 'Teusaquillo', 1.2, 45, [4.6632, -74.0784], {
+        days: 'Lunes - Viernes',
+        start: '07:00',
+        end: '07:45',
+        label: 'Paseo matutino',
+      }),
+      route('elena-b', 'Parque Metropolitano Simón Bolívar', 'Parque', 'Teusaquillo', 2.0, 60, [4.6585, -74.0935], {
+        days: 'Lunes - Viernes',
+        start: '18:00',
+        end: '19:00',
+        label: 'Paseo vespertino',
+      }),
     ],
   },
   {
@@ -87,14 +99,19 @@ export const initialWalkers: Walker[] = [
     name: 'Ricardo Bravo',
     photo: '/images/paseadores/ricardo.png',
     bio: 'Entrenador canino certificado. Ideal para perros con mucha energía que necesitan paseos largos y disciplina.',
-    zone: 'Zona Norte',
+    zone: 'Chapinero',
     walksCount: 298,
     capacity: 6,
     currentDogIds: ['bruno', 'maya'],
     currentRouteId: 'ricardo-a',
     featuredBreed: 'Pastor Alemán',
     routes: [
-      route('ricardo-a', 'Sendero del Bosque Norte', 'Sendero', 'Zona Norte', 3.5, 75, [0.012, -0.006]),
+      route('ricardo-a', 'Parque El Virrey', 'Parque', 'Chapinero', 3.5, 75, [4.6743, -74.0517], {
+        days: 'Fines de semana',
+        start: '09:00',
+        end: '10:15',
+        label: 'Paseo de fin de semana',
+      }),
     ],
   },
   {
@@ -102,27 +119,37 @@ export const initialWalkers: Walker[] = [
     name: 'Adela Ramos',
     photo: '/images/paseadores/adela.png',
     bio: 'Veterinaria en formación. Me encanta acompañar a perros mayores y cachorros con mucha paciencia.',
-    zone: 'Zona Sur',
+    zone: 'Tunjuelito',
     walksCount: 215,
     capacity: 5,
     currentDogIds: ['coco'],
     currentRouteId: 'adela-a',
     featuredBreed: 'Beagle',
-    routes: [route('adela-a', 'Jardín del Sur', 'Parque', 'Zona Sur', 1.0, 35, [-0.01, 0.003])],
+    routes: [route('adela-a', 'Parque El Tunal', 'Parque', 'Tunjuelito', 1.0, 35, [4.5747, -74.1304], {
+      days: 'Lunes - Viernes',
+      start: '08:30',
+      end: '09:05',
+      label: 'Paseo tranquilo',
+    })],
   },
   {
     id: 'gerardo',
     name: 'Gerardo Rojas',
     photo: '/images/paseadores/gerardo.png',
     bio: 'Paseos grupales divertidos. Experiencia con razas de todos los tamaños y perros rescatados.',
-    zone: 'Centro Histórico',
+    zone: 'Santa Fe',
     walksCount: 410,
     capacity: 8,
     currentDogIds: ['luna', 'toby', 'milo'],
     currentRouteId: 'gerardo-a',
     featuredBreed: 'Husky Siberiano',
     routes: [
-      route('gerardo-a', 'Plazas del Centro', 'Urbana', 'Centro Histórico', 2.4, 50, [0.004, 0.012]),
+      route('gerardo-a', 'Parque Nacional Enrique Olaya Herrera', 'Parque', 'Santa Fe', 2.4, 50, [4.6256, -74.0564], {
+        days: 'Lunes - Sábado',
+        start: '16:00',
+        end: '16:50',
+        label: 'Paseo grupal',
+      }),
     ],
   },
   {
@@ -130,14 +157,19 @@ export const initialWalkers: Walker[] = [
     name: 'Carolina Luna',
     photo: '/images/paseadores/carolina.png',
     bio: 'Paseos tranquilos y seguros. Perfecta para perros tímidos o que se están adaptando a su nuevo hogar.',
-    zone: 'Parque Central',
+    zone: 'Teusaquillo',
     walksCount: 187,
     capacity: 4,
     currentDogIds: ['canela'],
     currentRouteId: 'carolina-a',
     featuredBreed: 'Labrador',
     routes: [
-      route('carolina-a', 'Parque Central - Circuito B', 'Parque', 'Parque Central', 0.9, 30, [-0.004, -0.005]),
+      route('carolina-a', 'Parque Metropolitano Simón Bolívar', 'Parque', 'Teusaquillo', 0.9, 30, [4.6585, -74.0935], {
+        days: 'Lunes - Viernes',
+        start: '10:00',
+        end: '10:30',
+        label: 'Paseo corto',
+      }),
     ],
   },
   {
@@ -145,39 +177,54 @@ export const initialWalkers: Walker[] = [
     name: 'Paola Torres',
     photo: '/images/paseadores/paola.png',
     bio: 'Especialista en razas pequeñas. Paseos cortos, juegos de olfato y mucho cariño en cada salida.',
-    zone: 'Zona Norte',
+    zone: 'Usaquén',
     walksCount: 264,
     capacity: 6,
     currentDogIds: ['coco', 'toby'],
     currentRouteId: 'paola-a',
     featuredBreed: 'Terrier',
-    routes: [route('paola-a', 'Paseo de las Flores', 'Urbana', 'Zona Norte', 1.5, 40, [0.01, 0.008])],
+    routes: [route('paola-a', 'Parque de Usaquén', 'Parque', 'Usaquén', 1.5, 40, [4.6955, -74.0302], {
+      days: 'Lunes - Viernes',
+      start: '07:30',
+      end: '08:10',
+      label: 'Paseo matutino',
+    })],
   },
   {
     id: 'ulises',
     name: 'Ulises Lillo',
     photo: '/images/paseadores/ulises.png',
     bio: 'Corredor y amante de la naturaleza. Llevo a tu perro a senderos donde puede explorar y gastar energía.',
-    zone: 'Zona Sur',
+    zone: 'Tunjuelito',
     walksCount: 331,
     capacity: 7,
     currentDogIds: ['maya', 'luna', 'bruno'],
     currentRouteId: 'ulises-a',
     featuredBreed: 'Samoyedo',
-    routes: [route('ulises-a', 'Sendero del Río', 'Sendero', 'Zona Sur', 4.0, 90, [-0.012, -0.01])],
+    routes: [route('ulises-a', 'Parque El Tunal - Sendero', 'Sendero', 'Tunjuelito', 4.0, 90, [4.5747, -74.1304], {
+      days: 'Sábado - Domingo',
+      start: '07:00',
+      end: '08:30',
+      label: 'Ruta de sendero',
+    })],
   },
   {
     id: 'clara',
     name: 'Clara Milo',
     photo: '/images/paseadores/clara.png',
     bio: 'Paseos activos con hidratación y fotos en cada salida. Te mantengo informado durante todo el recorrido.',
-    zone: 'Centro Histórico',
+    zone: 'Chapinero',
     walksCount: 276,
     capacity: 6,
     currentDogIds: ['canela', 'milo'],
     currentRouteId: 'clara-a',
     featuredBreed: 'Shiba Inu',
-    routes: [route('clara-a', 'Alameda Central', 'Parque', 'Centro Histórico', 1.8, 45, [0.002, 0.018])],
+    routes: [route('clara-a', 'Parque de los Hippies', 'Parque', 'Chapinero', 1.8, 45, [4.6409, -74.0634], {
+      days: 'Martes - Sábado',
+      start: '17:00',
+      end: '17:45',
+      label: 'Paseo vespertino',
+    })],
   },
 ]
 
@@ -233,8 +280,8 @@ export const initialReviews: Review[] = [
 
 export const initialOwner: Owner = {
   name: 'Mariana González',
-  address: 'Av. Ámsterdam 120, Col. Condesa',
-  phone: '55 1234 5678',
+  address: 'Chapinero, Bogotá, Colombia',
+  phone: '',
   email: 'mariana@correo.com',
 }
 

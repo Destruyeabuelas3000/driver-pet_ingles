@@ -1,11 +1,10 @@
 import Image from 'next/image'
-import { Mail, MapPin, Phone } from 'lucide-react'
+import { Mail, MapPin } from 'lucide-react'
 
 /* NOTA EDITABLE: datos de contacto del pie de página */
 const CONTACT = {
   email: 'hola@driverpet.com',
-  phone: '55 0000 0000',
-  address: 'Ciudad de México',
+  address: 'Bogotá, Colombia',
 }
 
 export function SiteFooter() {
@@ -22,9 +21,6 @@ export function SiteFooter() {
           <h2 className="font-bold text-primary">Contacto</h2>
           <a href={`mailto:${CONTACT.email}`} className="flex items-center gap-2 hover:text-primary">
             <Mail className="size-4 text-primary" aria-hidden /> {CONTACT.email}
-          </a>
-          <a href={`tel:${CONTACT.phone.replace(/\s/g, '')}`} className="flex items-center gap-2 hover:text-primary">
-            <Phone className="size-4 text-primary" aria-hidden /> {CONTACT.phone}
           </a>
           <span className="flex items-center gap-2">
             <MapPin className="size-4 text-primary" aria-hidden /> {CONTACT.address}

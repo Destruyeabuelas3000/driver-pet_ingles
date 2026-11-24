@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { formatTime } from '@/lib/store'
 import type { Pet } from '@/lib/types'
 
-export function PetPanel({ pet }: { pet: Pet }) {
+export function PetPanel({ pet, petCount }: { pet: Pet; petCount: number }) {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center gap-4">
@@ -33,6 +33,16 @@ export function PetPanel({ pet }: { pet: Pet }) {
           <p className="font-bold">Edad</p>
           <p className="mt-1 text-sm">{pet.age}</p>
         </div>
+      </div>
+
+      <div>
+        <h3 className="font-bold">Descripción y cuidados</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {pet.notes || 'Aún no hay una descripción. Puedes agregarla desde Mi Perfil.'}
+        </p>
+        <p className="mt-2 text-sm font-medium">
+          Tienes {petCount} {petCount === 1 ? 'mascota registrada' : 'mascotas registradas'}.
+        </p>
       </div>
 
       <div>
