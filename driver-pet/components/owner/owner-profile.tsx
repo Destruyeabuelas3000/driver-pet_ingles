@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import { Dog, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Field, inputClass } from '@/components/form-fields'
+import { publicAsset } from '@/lib/utils'
 import { useApp } from '@/lib/store'
 import type { Pet, PetSize } from '@/lib/types'
 import { PetEditor } from './pet-editor'
@@ -37,7 +38,7 @@ export function OwnerProfile() {
     const pet: Pet = {
       id: crypto.randomUUID(),
       name: 'Nueva mascota',
-      photo: '/images/mascotas/coco.png',
+      photo: publicAsset('/images/mascotas/coco.png'),
       age: '1 año',
       breed: 'Mestizo',
       size: 'Mediano' as PetSize,

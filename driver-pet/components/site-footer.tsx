@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { Mail, MapPin } from 'lucide-react'
+import { publicAsset } from '@/lib/utils'
 
 /* NOTA EDITABLE: datos de contacto del pie de página */
 const CONTACT = {
@@ -12,7 +13,7 @@ export function SiteFooter() {
     <footer id="contacto" className="mt-16 border-t bg-secondary">
       <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-10 md:flex-row md:items-center md:justify-between md:px-6">
         <div className="flex items-center gap-4">
-          <Image src="/images/logo-color.png" alt="Driver Pet" width={120} height={96} className="h-20 w-auto" />
+          <Image src={publicAsset('/images/logo-color.png')} alt="Driver Pet" width={120} height={96} className="h-20 w-auto" />
           <p className="max-w-xs text-sm text-muted-foreground text-pretty">
             Paseos seguros, felices y con reportes para que siempre sepas cómo le fue a tu mejor amigo.
           </p>

@@ -1,5 +1,14 @@
 /** @type {import('next').NextConfig} */
+const basePath = '/driver-pet_ingles'
+
 const nextConfig = {
+  output: 'export',
+  basePath,
+  assetPrefix: `${basePath}/`,
+  trailingSlash: true,
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
   typescript: {
     ignoreBuildErrors: true,
   },

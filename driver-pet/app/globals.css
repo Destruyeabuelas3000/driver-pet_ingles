@@ -76,7 +76,7 @@
 
 /* Patrón de huellas del fondo (imagen en /public/images/paw-pattern.svg) */
 .paw-bg {
-  background-image: url('/images/paw-pattern.svg');
+  background-image: url('/driver-pet_ingles/images/paw-pattern.svg');
   background-size: 180px 180px;
   background-repeat: repeat;
 }

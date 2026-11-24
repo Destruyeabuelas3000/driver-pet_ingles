@@ -14,6 +14,7 @@
   ===========================================================
 */
 import type { Owner, Pet, Review, WalkReport, WalkRoute, Walker, WalkSchedule } from './types'
+import { publicAsset } from './utils'
 
 export const APP_NAME = 'Driver Pet'
 export const APP_TAGLINE = 'Encuentra el Paseador Ideal para tu Mascota'
@@ -71,7 +72,7 @@ export const initialWalkers: Walker[] = [
   {
     id: 'elena',
     name: 'Elena Torres',
-    photo: '/images/paseadores/elena.png',
+    photo: publicAsset('/images/paseadores/elena.png'),
     bio: 'Amante de los perros grandes. Paseos con mucho juego, socialización y cuidado especial en días calurosos.',
     zone: 'Teusaquillo',
     walksCount: 342,
@@ -97,7 +98,7 @@ export const initialWalkers: Walker[] = [
   {
     id: 'ricardo',
     name: 'Ricardo Bravo',
-    photo: '/images/paseadores/ricardo.png',
+    photo: publicAsset('/images/paseadores/ricardo.png'),
     bio: 'Entrenador canino certificado. Ideal para perros con mucha energía que necesitan paseos largos y disciplina.',
     zone: 'Chapinero',
     walksCount: 298,
@@ -117,7 +118,7 @@ export const initialWalkers: Walker[] = [
   {
     id: 'adela',
     name: 'Adela Ramos',
-    photo: '/images/paseadores/adela.png',
+    photo: publicAsset('/images/paseadores/adela.png'),
     bio: 'Veterinaria en formación. Me encanta acompañar a perros mayores y cachorros con mucha paciencia.',
     zone: 'Tunjuelito',
     walksCount: 215,
@@ -135,7 +136,7 @@ export const initialWalkers: Walker[] = [
   {
     id: 'gerardo',
     name: 'Gerardo Rojas',
-    photo: '/images/paseadores/gerardo.png',
+    photo: publicAsset('/images/paseadores/gerardo.png'),
     bio: 'Paseos grupales divertidos. Experiencia con razas de todos los tamaños y perros rescatados.',
     zone: 'Santa Fe',
     walksCount: 410,
@@ -155,7 +156,7 @@ export const initialWalkers: Walker[] = [
   {
     id: 'carolina',
     name: 'Carolina Luna',
-    photo: '/images/paseadores/carolina.png',
+    photo: publicAsset('/images/paseadores/carolina.png'),
     bio: 'Paseos tranquilos y seguros. Perfecta para perros tímidos o que se están adaptando a su nuevo hogar.',
     zone: 'Teusaquillo',
     walksCount: 187,
@@ -175,7 +176,7 @@ export const initialWalkers: Walker[] = [
   {
     id: 'paola',
     name: 'Paola Torres',
-    photo: '/images/paseadores/paola.png',
+    photo: publicAsset('/images/paseadores/paola.png'),
     bio: 'Especialista en razas pequeñas. Paseos cortos, juegos de olfato y mucho cariño en cada salida.',
     zone: 'Usaquén',
     walksCount: 264,
@@ -193,7 +194,7 @@ export const initialWalkers: Walker[] = [
   {
     id: 'ulises',
     name: 'Ulises Lillo',
-    photo: '/images/paseadores/ulises.png',
+    photo: publicAsset('/images/paseadores/ulises.png'),
     bio: 'Corredor y amante de la naturaleza. Llevo a tu perro a senderos donde puede explorar y gastar energía.',
     zone: 'Tunjuelito',
     walksCount: 331,
@@ -211,7 +212,7 @@ export const initialWalkers: Walker[] = [
   {
     id: 'clara',
     name: 'Clara Milo',
-    photo: '/images/paseadores/clara.png',
+    photo: publicAsset('/images/paseadores/clara.png'),
     bio: 'Paseos activos con hidratación y fotos en cada salida. Te mantengo informado durante todo el recorrido.',
     zone: 'Chapinero',
     walksCount: 276,
@@ -230,13 +231,13 @@ export const initialWalkers: Walker[] = [
 
 /* Perros que aparecen en "Actualmente: perros con correa" del panel del paseador */
 export const dogAvatars: Record<string, { name: string; photo: string }> = {
-  canela: { name: 'Lola', photo: '/images/mascotas/canela.png' },
-  bruno: { name: 'Bruno', photo: '/images/mascotas/bruno.png' },
-  coco: { name: 'Coco', photo: '/images/mascotas/coco.png' },
-  luna: { name: 'Luna', photo: '/images/mascotas/luna.png' },
-  maya: { name: 'Maya', photo: '/images/mascotas/maya.png' },
-  milo: { name: 'Milo', photo: '/images/mascotas/canela.png' },
-  toby: { name: 'Toby', photo: '/images/mascotas/toby.png' },
+  canela: { name: 'Lola', photo: publicAsset('/images/mascotas/canela.png') },
+  bruno: { name: 'Bruno', photo: publicAsset('/images/mascotas/bruno.png') },
+  coco: { name: 'Coco', photo: publicAsset('/images/mascotas/coco.png') },
+  luna: { name: 'Luna', photo: publicAsset('/images/mascotas/luna.png') },
+  maya: { name: 'Maya', photo: publicAsset('/images/mascotas/maya.png') },
+  milo: { name: 'Milo', photo: publicAsset('/images/mascotas/canela.png') },
+  toby: { name: 'Toby', photo: publicAsset('/images/mascotas/toby.png') },
 }
 
 export const initialReviews: Review[] = [
@@ -289,7 +290,7 @@ export const initialPets: Pet[] = [
   {
     id: 'canela',
     name: 'Canela',
-    photo: '/images/mascotas/canela.png',
+    photo: publicAsset('/images/mascotas/canela.png'),
     age: '4 años',
     breed: 'Golden Retriever',
     size: 'Grande',
@@ -304,7 +305,7 @@ export const initialPets: Pet[] = [
   {
     id: 'toby',
     name: 'Toby',
-    photo: '/images/mascotas/toby.png',
+    photo: publicAsset('/images/mascotas/toby.png'),
     age: '2 años',
     breed: 'Shiba Inu',
     size: 'Mediano',
@@ -318,7 +319,7 @@ export const initialPets: Pet[] = [
 export const initialReports: WalkReport[] = []
 
 export const SAMPLE_WALK_PHOTOS = [
-  '/images/paseos/paseo-1.png',
-  '/images/paseos/paseo-2.png',
-  '/images/paseadores/elena.png',
+  publicAsset('/images/paseos/paseo-1.png'),
+  publicAsset('/images/paseos/paseo-2.png'),
+  publicAsset('/images/paseadores/elena.png'),
 ]

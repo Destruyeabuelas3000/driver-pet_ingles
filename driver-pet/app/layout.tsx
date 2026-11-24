@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Roboto } from 'next/font/google'
 import { AppProvider } from '@/lib/store'
+import { publicAsset } from '@/lib/utils'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import './globals.css'
@@ -18,8 +19,8 @@ export const metadata: Metadata = {
     'Encuentra el paseador ideal para tu mascota: perfiles, rutas de paseo, calificaciones de dueños y reportes de cada paseo.',
   generator: 'v0.app',
   icons: {
-    icon: '/images/logo-icon.png',
-    apple: '/images/logo-icon.png',
+    icon: publicAsset('/images/logo-icon.png'),
+    apple: publicAsset('/images/logo-icon.png'),
   },
 }
 

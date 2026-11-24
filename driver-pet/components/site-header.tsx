@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { ClipboardCheck, Menu, Search, User, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, publicAsset } from '@/lib/utils'
 
 /* NOTA EDITABLE: enlaces del menú principal */
 const NAV_LINKS = [
@@ -32,7 +32,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border/70 bg-secondary/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 md:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="Driver Pet, inicio">
-          <Image src="/images/logo-icon.png" alt="" width={56} height={35} className="h-9 w-auto" priority />
+          <Image src={publicAsset('/images/logo-icon.png')} alt="" width={56} height={35} className="h-9 w-auto" priority />
           <span className="text-lg font-bold leading-none tracking-tight text-primary">
             DRIVER
             <span className="block text-[#1d2f4a]">PET</span>
